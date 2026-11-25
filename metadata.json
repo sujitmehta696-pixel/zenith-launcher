@@ -1,0 +1,6 @@
+{
+  "name": "Android 3D Rolling launcher OS",
+  "description": "Ultra-premium 3D rolling Android launcher OS with gesture navigation, full-ecosystem theming, 50+ studio wallpapers, and cloud-synced Pro Vault for Indus Appstore.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

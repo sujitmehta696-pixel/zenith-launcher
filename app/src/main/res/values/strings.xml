@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Android 3D Rolling launcher OS</string>
+    <string name="launcher_home_label">Android 3D Rolling launcher OS</string>
+
+    <!-- Navigation -->
+    <string name="nav_home">Home</string>
+    <string name="nav_launcher">Launcher</string>
+    <string name="nav_wallpapers">Wallpapers</string>
+    <string name="nav_themes">Themes</string>
+    <string name="nav_premium">Premium</string>
+    <string name="nav_settings">Settings</string>
+
+    <!-- Actions & Common -->
+    <string name="action_search">Search</string>
+    <string name="action_favorites">Favorites</string>
+    <string name="action_apply">Apply</string>
+    <string name="action_download">Download</string>
+    <string name="action_reset">Reset</string>
+    <string name="action_back">Back</string>
+    <string name="action_close">Close</string>
+    <string name="action_retry">Retry</string>
+    <string name="action_clear">Clear</string>
+    <string name="action_upgrade">Upgrade to Pro</string>
+    <string name="action_restore_purchases">Restore Purchases</string>
+
+    <!-- Launcher -->
+    <string name="launcher_set_default">Set as Default Launcher</string>
+    <string name="launcher_is_default">Active Default Home Launcher</string>
+    <string name="launcher_open_home">Open Live Home Screen</string>
+    <string name="launcher_app_drawer">App Drawer</string>
+    <string name="launcher_search_apps_hint">Search installed apps…</string>
+    <string name="launcher_mode_spinner">Spinner</string>
+    <string name="launcher_mode_grid">Grid</string>
+    <string name="launcher_mode_minimal">Minimal</string>
+
+    <!-- Wallpapers & Themes -->
+    <string name="wallpaper_set_home">Set Home Screen</string>
+    <string name="wallpaper_set_lock">Set Lock Screen</string>
+    <string name="wallpaper_set_both">Set Home &amp; Lock</string>
+    <string name="theme_apply">Apply Theme</string>
+    <string name="theme_applied">Currently Applied</string>
+    <string name="theme_reset">Reset to Studio Obsidian</string>
+
+    <!-- Support -->
+    <string name="support_email">support@androidlauncher.app</string>
+
+    <!-- Accessibility Gesture Controls -->
+    <string name="accessibility_service_label">3D Rolling OS Gestures</string>
+    <string name="accessibility_service_description">Used exclusively when you trigger a mapped Lock Screen, Notifications, or Quick Settings gesture from the Android 3D Rolling launcher OS home screen.</string>
+
+    <!-- Live Video Wallpaper & Notification Badges -->
+    <string name="live_wallpaper_description">4K &amp; MP4 Live Video Wallpaper Engine synced via 3D Rolling Launcher OS</string>
+    <string name="notification_listener_label">3D Rolling OS Notification Badges</string>
+
+    <!-- AdMob Configuration -->
+    <string name="admob_app_id">ca-app-pub-3940256099942544~3347511713</string>
+    <string name="admob_banner_unit_id">ca-app-pub-3940256099942544/6300978111</string>
+    <string name="admob_rewarded_unit_id">ca-app-pub-3940256099942544/5224354917</string>
+</resources>

@@ -1,0 +1,392 @@
+{
+  "entities": {
+    "UserProfile": {
+      "title": "UserProfile",
+      "description": "Authenticated user profile, cloud-synced launcher customization, gesture mappings, and Pro entitlement status.",
+      "type": "object",
+      "properties": {
+        "userId": {
+          "type": "string",
+          "description": "Firebase Auth UID matching the document owner."
+        },
+        "displayName": {
+          "type": "string",
+          "description": "User display name shown in the Studio account card."
+        },
+        "email": {
+          "type": "string",
+          "description": "Optional Google account email."
+        },
+        "handle": {
+          "type": "string",
+          "description": "Optional custom studio handle chosen during registration."
+        },
+        "premiumActive": {
+          "type": "boolean",
+          "description": "Whether Pro entitlement is unlocked on this account."
+        },
+        "activeProductId": {
+          "type": "string",
+          "description": "Optional active product SKU."
+        },
+        "purchaseSource": {
+          "type": "string",
+          "enum": ["NONE", "GOOGLE_PLAY", "PAYMENT_GATEWAY", "ADMIN_GRANT"],
+          "description": "Origin of the active verified entitlement."
+        },
+        "purchaseTokenHash": {
+          "type": "string",
+          "description": "Optional SHA-256 fingerprint of verified Play or Payment Gateway transaction."
+        },
+        "subscriptionActive": {
+          "type": "boolean",
+          "description": "Whether the timed or lifetime subscription is active."
+        },
+        "planId": {
+          "type": "string",
+          "description": "Active subscription plan identifier."
+        },
+        "planName": {
+          "type": "string",
+          "description": "Display name of the active subscription plan."
+        },
+        "planStartedAtMillis": {
+          "type": "integer",
+          "description": "Epoch millis when current subscription period started."
+        },
+        "planExpiresAtMillis": {
+          "type": "integer",
+          "description": "Epoch millis when current subscription period expires."
+        },
+        "activeThemeId": {
+          "type": "string",
+          "description": "Synced active theme identifier."
+        },
+        "activeWallpaperId": {
+          "type": "string",
+          "description": "Synced active wallpaper identifier."
+        },
+        "launcherMode": {
+          "type": "string",
+          "enum": ["SPINNER", "GRID", "MINIMAL"],
+          "description": "Preferred launcher home mode."
+        },
+        "spinnerStyle": {
+          "type": "string",
+          "enum": ["ORBITAL_DIAL", "CHRONOS_RING", "CYBER_ARC", "LUXURY_HALO", "PRO_3D_SPHERE"],
+          "description": "Preferred spinner dial style."
+        },
+        "swipeDownAction": {
+          "type": "string",
+          "enum": ["NONE", "OPEN_NOTIFICATIONS", "OPEN_QUICK_SETTINGS", "LOCK_SCREEN", "OPEN_APP_DRAWER", "OPEN_SEARCH", "SPIN_WHEEL", "OPEN_STUDIO", "OPEN_CONTROL_CENTER", "OPEN_EDGE_PANEL"],
+          "description": "Action mapped to swipe-down gesture."
+        },
+        "swipeUpAction": {
+          "type": "string",
+          "enum": ["NONE", "OPEN_NOTIFICATIONS", "OPEN_QUICK_SETTINGS", "LOCK_SCREEN", "OPEN_APP_DRAWER", "OPEN_SEARCH", "SPIN_WHEEL", "OPEN_STUDIO", "OPEN_CONTROL_CENTER", "OPEN_EDGE_PANEL"],
+          "description": "Action mapped to swipe-up gesture."
+        },
+        "doubleTapAction": {
+          "type": "string",
+          "enum": ["NONE", "OPEN_NOTIFICATIONS", "OPEN_QUICK_SETTINGS", "LOCK_SCREEN", "OPEN_APP_DRAWER", "OPEN_SEARCH", "SPIN_WHEEL", "OPEN_STUDIO", "OPEN_CONTROL_CENTER", "OPEN_EDGE_PANEL"],
+          "description": "Action mapped to double-tap gesture."
+        },
+        "longPressAction": {
+          "type": "string",
+          "enum": ["NONE", "OPEN_NOTIFICATIONS", "OPEN_QUICK_SETTINGS", "LOCK_SCREEN", "OPEN_APP_DRAWER", "OPEN_SEARCH", "SPIN_WHEEL", "OPEN_STUDIO", "OPEN_CONTROL_CENTER", "OPEN_EDGE_PANEL"],
+          "description": "Action mapped to home background long-press gesture."
+        },
+        "pinchAction": {
+          "type": "string",
+          "enum": ["NONE", "OPEN_NOTIFICATIONS", "OPEN_QUICK_SETTINGS", "LOCK_SCREEN", "OPEN_APP_DRAWER", "OPEN_SEARCH", "SPIN_WHEEL", "OPEN_STUDIO", "OPEN_CONTROL_CENTER", "OPEN_EDGE_PANEL"],
+          "description": "Optional action mapped to two-finger pinch gesture."
+        },
+        "isActive": {
+          "type": "boolean",
+          "description": "Whether the user recently opened the User App."
+        },
+        "isBlocked": {
+          "type": "boolean",
+          "description": "Remote admin block flag."
+        },
+        "appVersion": {
+          "type": "string",
+          "description": "Installed User App version label."
+        },
+        "lastActiveAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server timestamp of latest heartbeat (FieldValue.serverTimestamp())."
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server timestamp when account profile was created (FieldValue.serverTimestamp())."
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server timestamp of last profile or settings update (FieldValue.serverTimestamp())."
+        }
+      },
+      "required": [
+        "userId",
+        "displayName",
+        "premiumActive",
+        "purchaseSource",
+        "activeThemeId",
+        "activeWallpaperId",
+        "launcherMode",
+        "spinnerStyle",
+        "swipeDownAction",
+        "swipeUpAction",
+        "doubleTapAction",
+        "longPressAction",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "PurchaseRecord": {
+      "title": "PurchaseRecord",
+      "description": "Immutable entitlement activation log linked to the user account.",
+      "type": "object",
+      "properties": {
+        "userId": {
+          "type": "string",
+          "description": "Owner Firebase Auth UID."
+        },
+        "productId": {
+          "type": "string",
+          "description": "Purchased product SKU."
+        },
+        "purchaseSource": {
+          "type": "string",
+          "enum": ["GOOGLE_PLAY", "PAYMENT_GATEWAY"],
+          "description": "Source that verified the real payment entitlement."
+        },
+        "purchaseTokenHash": {
+          "type": "string",
+          "description": "SHA-256 hash of the Play token or Payment Gateway transaction ID."
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server timestamp when purchase was recorded (FieldValue.serverTimestamp())."
+        }
+      },
+      "required": [
+        "userId",
+        "productId",
+        "purchaseSource",
+        "createdAt"
+      ]
+    },
+    "AdminRecord": {
+      "title": "AdminRecord",
+      "description": "Authorized admin operator record stored by UID.",
+      "type": "object",
+      "properties": {
+        "adminUid": { "type": "string" },
+        "email": { "type": "string" },
+        "displayName": { "type": "string" },
+        "role": { "type": "string", "enum": ["SUPER_ADMIN", "CONTENT_ADMIN"] },
+        "addedByUid": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["adminUid", "email", "displayName", "role", "addedByUid", "createdAt", "updatedAt"]
+    },
+    "WallpaperCategoryDoc": {
+      "title": "WallpaperCategoryDoc",
+      "description": "Cloud wallpaper & live video category managed from Admin APK.",
+      "type": "object",
+      "properties": {
+        "categoryId": { "type": "string" },
+        "name": { "type": "string" },
+        "description": { "type": "string" },
+        "sortOrder": { "type": "integer" },
+        "isActive": { "type": "boolean" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["categoryId", "name", "description", "sortOrder", "isActive", "createdAt", "updatedAt"]
+    },
+    "RemoteWallpaper": {
+      "title": "RemoteWallpaper",
+      "description": "Admin-uploaded HD/4K image or MP4 live video wallpaper synced live to User App.",
+      "type": "object",
+      "properties": {
+        "wallpaperId": { "type": "string" },
+        "title": { "type": "string" },
+        "description": { "type": "string" },
+        "categoryId": { "type": "string" },
+        "categoryName": { "type": "string" },
+        "mediaType": { "type": "string", "enum": ["IMAGE", "VIDEO"] },
+        "mediaUrl": { "type": "string" },
+        "thumbnailUrl": { "type": "string" },
+        "storagePath": { "type": "string" },
+        "thumbnailStoragePath": { "type": "string" },
+        "resolutionLabel": { "type": "string" },
+        "fileSizeBytes": { "type": "integer" },
+        "isPremium": { "type": "boolean" },
+        "isPublished": { "type": "boolean" },
+        "downloadCount": { "type": "integer" },
+        "uploadedByUid": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": [
+        "wallpaperId",
+        "title",
+        "description",
+        "categoryId",
+        "categoryName",
+        "mediaType",
+        "mediaUrl",
+        "thumbnailUrl",
+        "storagePath",
+        "resolutionLabel",
+        "fileSizeBytes",
+        "isPremium",
+        "isPublished",
+        "downloadCount",
+        "uploadedByUid",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "RemoteAppConfig": {
+      "title": "RemoteAppConfig",
+      "description": "Global feature flags, maintenance mode, live announcement, and client-safe Payment Gateway URLs controlled by Admin APK.",
+      "type": "object",
+      "properties": {
+        "configId": { "type": "string" },
+        "maintenanceMode": { "type": "boolean" },
+        "maintenanceMessage": { "type": "string" },
+        "announcementBanner": { "type": "string" },
+        "aiSearchEnabled": { "type": "boolean" },
+        "liveWallpapersEnabled": { "type": "boolean" },
+        "edgePanelEnabled": { "type": "boolean" },
+        "controlCenterEnabled": { "type": "boolean" },
+        "notificationBadgesEnabled": { "type": "boolean" },
+        "paymentGatewayEnabled": { "type": "boolean" },
+        "paymentProviderName": { "type": "string" },
+        "paymentBackendUrl": { "type": "string" },
+        "paymentVerifyUrl": { "type": "string" },
+        "paymentPublicKey": { "type": "string" },
+        "paymentCurrency": { "type": "string" },
+        "monthlyPriceLabel": { "type": "string" },
+        "yearlyPriceLabel": { "type": "string" },
+        "lifetimePriceLabel": { "type": "string" },
+        "monthlyAmount": { "type": "string" },
+        "yearlyAmount": { "type": "string" },
+        "lifetimeAmount": { "type": "string" },
+        "usdToInrRate": { "type": "number" },
+        "updatedByUid": { "type": "string" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": [
+        "configId",
+        "maintenanceMode",
+        "maintenanceMessage",
+        "announcementBanner",
+        "aiSearchEnabled",
+        "liveWallpapersEnabled",
+        "edgePanelEnabled",
+        "controlCenterEnabled",
+        "notificationBadgesEnabled",
+        "updatedByUid",
+        "updatedAt"
+      ]
+    },
+    "PaymentGatewaySecrets": {
+      "title": "PaymentGatewaySecrets",
+      "description": "Admin-only private Payment Gateway Secret API key and Webhook secret stored isolated from client users.",
+      "type": "object",
+      "properties": {
+        "secretId": { "type": "string" },
+        "providerName": { "type": "string" },
+        "secretApiKey": { "type": "string" },
+        "webhookSecret": { "type": "string" },
+        "updatedByUid": { "type": "string" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["secretId", "providerName", "secretApiKey", "webhookSecret", "updatedByUid", "updatedAt"]
+    },
+    "SubscriptionPlan": {
+      "title": "SubscriptionPlan",
+      "description": "Admin-managed INR subscription plans synced live to User App.",
+      "type": "object",
+      "properties": {
+        "planId": { "type": "string" },
+        "planName": { "type": "string" },
+        "subtitle": { "type": "string" },
+        "priceInr": { "type": "number" },
+        "validityDays": { "type": "integer" },
+        "badge": { "type": "string" },
+        "sortOrder": { "type": "integer" },
+        "isActive": { "type": "boolean" },
+        "updatedByUid": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["planId", "planName", "subtitle", "priceInr", "validityDays", "badge", "sortOrder", "isActive", "updatedByUid", "createdAt", "updatedAt"]
+    },
+    "PaymentOrder": {
+      "title": "PaymentOrder",
+      "description": "Server-managed FamGateway payment order record.",
+      "type": "object",
+      "properties": {
+        "orderId": { "type": "string" },
+        "userId": { "type": "string" },
+        "planId": { "type": "string" },
+        "planName": { "type": "string" },
+        "priceInr": { "type": "number" },
+        "validityDays": { "type": "integer" },
+        "status": { "type": "string", "enum": ["PENDING", "PAID", "FAILED"] },
+        "gatewayTransactionId": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["orderId", "userId", "planId", "planName", "priceInr", "validityDays", "status", "createdAt", "updatedAt"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": { "$ref": "#/entities/UserProfile" },
+      "description": "Per-user profile, Pro entitlement, activity heartbeat, moderation flags, and synced settings."
+    },
+    "/users/{userId}/purchases/{purchaseId}": {
+      "schema": { "$ref": "#/entities/PurchaseRecord" },
+      "description": "Append-only per-user history of Pro entitlement activations."
+    },
+    "/admins/{adminUid}": {
+      "schema": { "$ref": "#/entities/AdminRecord" },
+      "description": "Authorized admin operators who can manage wallpapers, categories, users, and app config."
+    },
+    "/wallpaper_categories/{categoryId}": {
+      "schema": { "$ref": "#/entities/WallpaperCategoryDoc" },
+      "description": "Shared categories created by Admin APK and displayed live in User APK."
+    },
+    "/remote_wallpapers/{wallpaperId}": {
+      "schema": { "$ref": "#/entities/RemoteWallpaper" },
+      "description": "Admin-uploaded HD/4K images and MP4 live video wallpapers synced live to User APK."
+    },
+    "/app_config/{configId}": {
+      "schema": { "$ref": "#/entities/RemoteAppConfig" },
+      "description": "Remote configuration document (global) controlling User App features, checkout URLs, and maintenance mode."
+    },
+    "/admin_secrets/{secretId}": {
+      "schema": { "$ref": "#/entities/PaymentGatewaySecrets" },
+      "description": "Strictly admin-only vault holding private Payment Gateway secret API keys and webhook secrets."
+    },
+    "/subscription_plans/{planId}": {
+      "schema": { "$ref": "#/entities/SubscriptionPlan" },
+      "description": "Editable INR subscription plans (Plan Name, Price INR, Validity Days) managed from Admin APK."
+    },
+    "/payment_orders/{orderId}": {
+      "schema": { "$ref": "#/entities/PaymentOrder" },
+      "description": "Server-side FamGateway order tracking records."
+    }
+  }
+}

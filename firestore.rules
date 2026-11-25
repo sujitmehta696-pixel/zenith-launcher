@@ -1,0 +1,626 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Global default-deny safety net
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    function isAdmin() {
+      return isSignedIn() && (
+        (
+          request.auth.token.email_verified == true &&
+          request.auth.token.email == 'sujitmehta696@gmail.com'
+        ) ||
+        exists(/databases/$(database)/documents/admins/$(request.auth.uid))
+      );
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() >= 1 && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    function isValidGestureAction(action) {
+      return action in [
+        'NONE',
+        'OPEN_NOTIFICATIONS',
+        'OPEN_QUICK_SETTINGS',
+        'LOCK_SCREEN',
+        'OPEN_APP_DRAWER',
+        'OPEN_SEARCH',
+        'SPIN_WHEEL',
+        'OPEN_STUDIO',
+        'OPEN_CONTROL_CENTER',
+        'OPEN_EDGE_PANEL'
+      ];
+    }
+
+    function isValidUserProfile(data) {
+      return data.userId is string &&
+             data.userId.size() >= 1 &&
+             data.userId.size() <= 128 &&
+             data.displayName is string &&
+             data.displayName.size() >= 1 &&
+             data.displayName.size() <= 60 &&
+             (!('email' in data) || (data.email is string && data.email.size() <= 120)) &&
+             (!('handle' in data) || (data.handle is string && data.handle.size() >= 2 && data.handle.size() <= 32)) &&
+             data.premiumActive is bool &&
+             (!('activeProductId' in data) || (data.activeProductId is string && data.activeProductId.size() >= 1 && data.activeProductId.size() <= 64)) &&
+             data.purchaseSource in ['NONE', 'GOOGLE_PLAY', 'PAYMENT_GATEWAY', 'ADMIN_GRANT'] &&
+             (!('purchaseTokenHash' in data) || (data.purchaseTokenHash is string && data.purchaseTokenHash.size() <= 128)) &&
+             (!('subscriptionActive' in data) || data.subscriptionActive is bool) &&
+             (!('planId' in data) || (data.planId is string && data.planId.size() >= 1 && data.planId.size() <= 64)) &&
+             (!('planName' in data) || (data.planName is string && data.planName.size() >= 1 && data.planName.size() <= 60)) &&
+             (!('planStartedAtMillis' in data) || (data.planStartedAtMillis is int && data.planStartedAtMillis >= 0)) &&
+             (!('planExpiresAtMillis' in data) || (data.planExpiresAtMillis is int && data.planExpiresAtMillis >= 0)) &&
+             data.activeThemeId is string &&
+             data.activeThemeId.size() >= 1 &&
+             data.activeThemeId.size() <= 80 &&
+             data.activeWallpaperId is string &&
+             data.activeWallpaperId.size() >= 1 &&
+             data.activeWallpaperId.size() <= 80 &&
+             data.launcherMode in ['SPINNER', 'GRID', 'MINIMAL'] &&
+             data.spinnerStyle in ['ORBITAL_DIAL', 'CHRONOS_RING', 'CYBER_ARC', 'LUXURY_HALO', 'PRO_3D_SPHERE'] &&
+             isValidGestureAction(data.swipeDownAction) &&
+             isValidGestureAction(data.swipeUpAction) &&
+             isValidGestureAction(data.doubleTapAction) &&
+             isValidGestureAction(data.longPressAction) &&
+             (!('pinchAction' in data) || isValidGestureAction(data.pinchAction)) &&
+             (!('isActive' in data) || data.isActive is bool) &&
+             (!('isBlocked' in data) || data.isBlocked is bool) &&
+             (!('appVersion' in data) || (data.appVersion is string && data.appVersion.size() <= 32)) &&
+             (!('lastActiveAt' in data) || (data.lastActiveAt is timestamp && data.lastActiveAt <= request.time)) &&
+             data.createdAt is timestamp &&
+             data.createdAt <= request.time &&
+             data.updatedAt is timestamp &&
+             data.updatedAt <= request.time;
+    }
+
+    function isValidPurchaseRecord(data) {
+      return data.userId is string &&
+             data.userId == request.auth.uid &&
+             data.userId.size() <= 128 &&
+             data.productId is string &&
+             data.productId.size() >= 1 &&
+             data.productId.size() <= 64 &&
+             data.purchaseSource in ['GOOGLE_PLAY', 'PAYMENT_GATEWAY'] &&
+             (!('purchaseTokenHash' in data) || (data.purchaseTokenHash is string && data.purchaseTokenHash.size() <= 128)) &&
+             data.createdAt is timestamp &&
+             data.createdAt <= request.time;
+    }
+
+    function isValidAdminRecord(data, adminUid) {
+      return data.adminUid is string &&
+             data.adminUid == adminUid &&
+             data.adminUid.size() <= 128 &&
+             data.email is string &&
+             data.email.size() >= 3 &&
+             data.email.size() <= 120 &&
+             data.displayName is string &&
+             data.displayName.size() >= 1 &&
+             data.displayName.size() <= 60 &&
+             data.role in ['SUPER_ADMIN', 'CONTENT_ADMIN'] &&
+             data.addedByUid is string &&
+             data.addedByUid.size() >= 1 &&
+             data.addedByUid.size() <= 128 &&
+             data.createdAt is timestamp &&
+             data.createdAt <= request.time &&
+             data.updatedAt is timestamp &&
+             data.updatedAt <= request.time;
+    }
+
+    function isValidCategory(data, categoryId) {
+      return data.categoryId is string &&
+             data.categoryId == categoryId &&
+             data.categoryId.size() <= 64 &&
+             data.name is string &&
+             data.name.size() >= 1 &&
+             data.name.size() <= 40 &&
+             data.description is string &&
+             data.description.size() <= 160 &&
+             data.sortOrder is int &&
+             data.sortOrder >= 0 &&
+             data.sortOrder <= 10000 &&
+             data.isActive is bool &&
+             data.createdAt is timestamp &&
+             data.createdAt <= request.time &&
+             data.updatedAt is timestamp &&
+             data.updatedAt <= request.time;
+    }
+
+    function isValidRemoteWallpaper(data, wallpaperId) {
+      return data.wallpaperId is string &&
+             data.wallpaperId == wallpaperId &&
+             data.wallpaperId.size() <= 128 &&
+             data.title is string &&
+             data.title.size() >= 1 &&
+             data.title.size() <= 80 &&
+             data.description is string &&
+             data.description.size() <= 400 &&
+             data.categoryId is string &&
+             data.categoryId.size() >= 1 &&
+             data.categoryId.size() <= 64 &&
+             data.categoryName is string &&
+             data.categoryName.size() >= 1 &&
+             data.categoryName.size() <= 40 &&
+             data.mediaType in ['IMAGE', 'VIDEO'] &&
+             data.mediaUrl is string &&
+             data.mediaUrl.size() >= 8 &&
+             data.mediaUrl.size() <= 1500 &&
+             data.thumbnailUrl is string &&
+             data.thumbnailUrl.size() >= 8 &&
+             data.thumbnailUrl.size() <= 1500 &&
+             data.storagePath is string &&
+             data.storagePath.size() >= 1 &&
+             data.storagePath.size() <= 500 &&
+             (!('thumbnailStoragePath' in data) || (data.thumbnailStoragePath is string && data.thumbnailStoragePath.size() <= 500)) &&
+             data.resolutionLabel is string &&
+             data.resolutionLabel.size() >= 1 &&
+             data.resolutionLabel.size() <= 40 &&
+             data.fileSizeBytes is int &&
+             data.fileSizeBytes >= 0 &&
+             data.fileSizeBytes <= 100000000 &&
+             data.isPremium is bool &&
+             data.isPublished is bool &&
+             data.downloadCount is int &&
+             data.downloadCount >= 0 &&
+             data.uploadedByUid is string &&
+             data.uploadedByUid.size() >= 1 &&
+             data.uploadedByUid.size() <= 128 &&
+             data.createdAt is timestamp &&
+             data.createdAt <= request.time &&
+             data.updatedAt is timestamp &&
+             data.updatedAt <= request.time;
+    }
+
+    function isValidRemoteConfig(data, configId) {
+      return data.configId is string &&
+             data.configId == configId &&
+             data.configId == 'global' &&
+             data.maintenanceMode is bool &&
+             data.maintenanceMessage is string &&
+             data.maintenanceMessage.size() <= 240 &&
+             data.announcementBanner is string &&
+             data.announcementBanner.size() <= 240 &&
+             data.aiSearchEnabled is bool &&
+             data.liveWallpapersEnabled is bool &&
+             data.edgePanelEnabled is bool &&
+             data.controlCenterEnabled is bool &&
+             data.notificationBadgesEnabled is bool &&
+             (!('paymentGatewayEnabled' in data) || data.paymentGatewayEnabled is bool) &&
+             (!('paymentProviderName' in data) || (data.paymentProviderName is string && data.paymentProviderName.size() <= 40)) &&
+             (!('paymentBackendUrl' in data) || (data.paymentBackendUrl is string && data.paymentBackendUrl.size() <= 500)) &&
+             (!('paymentVerifyUrl' in data) || (data.paymentVerifyUrl is string && data.paymentVerifyUrl.size() <= 500)) &&
+             (!('paymentPublicKey' in data) || (data.paymentPublicKey is string && data.paymentPublicKey.size() <= 200)) &&
+             (!('paymentCurrency' in data) || (data.paymentCurrency is string && data.paymentCurrency.size() <= 8)) &&
+             (!('monthlyPriceLabel' in data) || (data.monthlyPriceLabel is string && data.monthlyPriceLabel.size() <= 24)) &&
+             (!('yearlyPriceLabel' in data) || (data.yearlyPriceLabel is string && data.yearlyPriceLabel.size() <= 24)) &&
+             (!('lifetimePriceLabel' in data) || (data.lifetimePriceLabel is string && data.lifetimePriceLabel.size() <= 24)) &&
+             (!('monthlyAmount' in data) || (data.monthlyAmount is string && data.monthlyAmount.size() <= 16)) &&
+             (!('yearlyAmount' in data) || (data.yearlyAmount is string && data.yearlyAmount.size() <= 16)) &&
+             (!('lifetimeAmount' in data) || (data.lifetimeAmount is string && data.lifetimeAmount.size() <= 16)) &&
+             (!('usdToInrRate' in data) || (data.usdToInrRate is number && data.usdToInrRate > 0 && data.usdToInrRate <= 10000)) &&
+             data.updatedByUid is string &&
+             data.updatedByUid.size() >= 1 &&
+             data.updatedByUid.size() <= 128 &&
+             data.updatedAt is timestamp &&
+             data.updatedAt <= request.time;
+    }
+
+    function isValidPaymentSecrets(data, secretId) {
+      return data.secretId is string &&
+             data.secretId == secretId &&
+             data.secretId == 'payment_gateway' &&
+             data.providerName is string &&
+             data.providerName.size() <= 40 &&
+             data.secretApiKey is string &&
+             data.secretApiKey.size() <= 300 &&
+             data.webhookSecret is string &&
+             data.webhookSecret.size() <= 300 &&
+             data.updatedByUid is string &&
+             data.updatedByUid.size() >= 1 &&
+             data.updatedByUid.size() <= 128 &&
+             data.updatedAt is timestamp &&
+             data.updatedAt <= request.time;
+    }
+
+    function isValidSubscriptionPlan(data, planId) {
+      return data.planId is string &&
+             data.planId == planId &&
+             data.planId.size() <= 64 &&
+             data.planName is string &&
+             data.planName.size() >= 1 &&
+             data.planName.size() <= 60 &&
+             data.subtitle is string &&
+             data.subtitle.size() <= 180 &&
+             data.priceInr is number &&
+             data.priceInr >= 1 &&
+             data.priceInr <= 1000000 &&
+             data.validityDays is int &&
+             data.validityDays >= 1 &&
+             data.validityDays <= 36500 &&
+             data.badge is string &&
+             data.badge.size() <= 24 &&
+             data.sortOrder is int &&
+             data.sortOrder >= 0 &&
+             data.sortOrder <= 10000 &&
+             data.isActive is bool &&
+             data.updatedByUid is string &&
+             data.updatedByUid.size() >= 1 &&
+             data.updatedByUid.size() <= 128 &&
+             data.createdAt is timestamp &&
+             data.createdAt <= request.time &&
+             data.updatedAt is timestamp &&
+             data.updatedAt <= request.time;
+    }
+
+    match /users/{userId} {
+      // Strictly owner or admin read to isolate PII
+      allow get: if isValidId(userId) && (isOwner(userId) || isAdmin());
+      allow list: if isAdmin();
+
+      allow create: if isSignedIn() &&
+                       isOwner(userId) &&
+                       isValidId(userId) &&
+                       incoming().userId == request.auth.uid &&
+                       incoming().premiumActive == false &&
+                       (!('subscriptionActive' in incoming()) || incoming().subscriptionActive == false) &&
+                       incoming().purchaseSource == 'NONE' &&
+                       (!('isBlocked' in incoming()) || incoming().isBlocked == false) &&
+                       incoming().keys().hasAll([
+                         'userId',
+                         'displayName',
+                         'premiumActive',
+                         'purchaseSource',
+                         'activeThemeId',
+                         'activeWallpaperId',
+                         'launcherMode',
+                         'spinnerStyle',
+                         'swipeDownAction',
+                         'swipeUpAction',
+                         'doubleTapAction',
+                         'longPressAction',
+                         'createdAt',
+                         'updatedAt'
+                       ]) &&
+                       incoming().keys().hasOnly([
+                         'userId',
+                         'displayName',
+                         'email',
+                         'handle',
+                         'premiumActive',
+                         'subscriptionActive',
+                         'planId',
+                         'planName',
+                         'planStartedAtMillis',
+                         'planExpiresAtMillis',
+                         'activeProductId',
+                         'purchaseSource',
+                         'purchaseTokenHash',
+                         'activeThemeId',
+                         'activeWallpaperId',
+                         'launcherMode',
+                         'spinnerStyle',
+                         'swipeDownAction',
+                         'swipeUpAction',
+                         'doubleTapAction',
+                         'longPressAction',
+                         'pinchAction',
+                         'isActive',
+                         'isBlocked',
+                         'appVersion',
+                         'lastActiveAt',
+                         'createdAt',
+                         'updatedAt'
+                       ]) &&
+                       isValidUserProfile(incoming());
+
+      allow update: if isSignedIn() &&
+                       isValidId(userId) &&
+                       isValidUserProfile(incoming()) &&
+                       incoming().userId == existing().userId &&
+                       incoming().createdAt == existing().createdAt &&
+                       (
+                         (
+                           isOwner(userId) &&
+                           (
+                             // Action 1: Profile, telemetry & customization sync
+                             incoming().diff(existing()).affectedKeys().hasOnly([
+                               'displayName',
+                               'email',
+                               'handle',
+                               'activeThemeId',
+                               'activeWallpaperId',
+                               'launcherMode',
+                               'spinnerStyle',
+                               'swipeDownAction',
+                               'swipeUpAction',
+                               'doubleTapAction',
+                               'longPressAction',
+                               'pinchAction',
+                               'isActive',
+                               'appVersion',
+                               'lastActiveAt',
+                               'updatedAt'
+                             ]) ||
+                             // Action 2: Verified real-payment Pro entitlement sync
+                             (
+                               incoming().purchaseSource in ['GOOGLE_PLAY', 'PAYMENT_GATEWAY'] &&
+                               incoming().diff(existing()).affectedKeys().hasOnly([
+                                 'premiumActive',
+                                 'subscriptionActive',
+                                 'planId',
+                                 'planName',
+                                 'planStartedAtMillis',
+                                 'planExpiresAtMillis',
+                                 'activeProductId',
+                                 'purchaseSource',
+                                 'purchaseTokenHash',
+                                 'updatedAt'
+                               ])
+                             )
+                           )
+                         ) ||
+                         (
+                           isAdmin() &&
+                           incoming().diff(existing()).affectedKeys().hasOnly([
+                             'premiumActive',
+                             'subscriptionActive',
+                             'planId',
+                             'planName',
+                             'planStartedAtMillis',
+                             'planExpiresAtMillis',
+                             'activeProductId',
+                             'purchaseSource',
+                             'isBlocked',
+                             'updatedAt'
+                           ])
+                         )
+                       );
+
+      allow delete: if isValidId(userId) && (isOwner(userId) || isAdmin());
+
+      match /purchases/{purchaseId} {
+        allow get: if isValidId(userId) && isValidId(purchaseId) && (isOwner(userId) || isAdmin());
+        allow list: if isValidId(userId) && (isOwner(userId) || isAdmin());
+
+        allow create: if isSignedIn() &&
+                         isOwner(userId) &&
+                         isValidId(purchaseId) &&
+                         incoming().keys().hasAll([
+                           'userId',
+                           'productId',
+                           'purchaseSource',
+                           'createdAt'
+                         ]) &&
+                         incoming().keys().hasOnly([
+                           'userId',
+                           'productId',
+                           'purchaseSource',
+                           'purchaseTokenHash',
+                           'createdAt'
+                         ]) &&
+                         isValidPurchaseRecord(incoming());
+
+        allow update, delete: if false;
+      }
+    }
+
+    match /admins/{adminUid} {
+      allow get: if isValidId(adminUid) && (isOwner(adminUid) || isAdmin());
+      allow list: if isAdmin();
+
+      allow create: if isAdmin() &&
+                       isValidId(adminUid) &&
+                       incoming().keys().hasAll([
+                         'adminUid', 'email', 'displayName', 'role', 'addedByUid', 'createdAt', 'updatedAt'
+                       ]) &&
+                       incoming().keys().hasOnly([
+                         'adminUid', 'email', 'displayName', 'role', 'addedByUid', 'createdAt', 'updatedAt'
+                       ]) &&
+                       isValidAdminRecord(incoming(), adminUid);
+
+      allow update: if isAdmin() &&
+                       isValidId(adminUid) &&
+                       isValidAdminRecord(incoming(), adminUid) &&
+                       incoming().adminUid == existing().adminUid &&
+                       incoming().createdAt == existing().createdAt &&
+                       incoming().diff(existing()).affectedKeys().hasOnly([
+                         'email', 'displayName', 'role', 'updatedAt'
+                       ]);
+
+      allow delete: if isAdmin() && isValidId(adminUid);
+    }
+
+    match /wallpaper_categories/{categoryId} {
+      allow get: if isValidId(categoryId) && (isAdmin() || (isSignedIn() && existing().isActive == true));
+      allow list: if isAdmin() || (isSignedIn() && existing().isActive == true);
+
+      allow create: if isAdmin() &&
+                       isValidId(categoryId) &&
+                       incoming().keys().hasAll([
+                         'categoryId', 'name', 'description', 'sortOrder', 'isActive', 'createdAt', 'updatedAt'
+                       ]) &&
+                       incoming().keys().hasOnly([
+                         'categoryId', 'name', 'description', 'sortOrder', 'isActive', 'createdAt', 'updatedAt'
+                       ]) &&
+                       isValidCategory(incoming(), categoryId);
+
+      allow update: if isAdmin() &&
+                       isValidId(categoryId) &&
+                       isValidCategory(incoming(), categoryId) &&
+                       incoming().categoryId == existing().categoryId &&
+                       incoming().createdAt == existing().createdAt &&
+                       incoming().diff(existing()).affectedKeys().hasOnly([
+                         'name', 'description', 'sortOrder', 'isActive', 'updatedAt'
+                       ]);
+
+      allow delete: if isAdmin() && isValidId(categoryId);
+    }
+
+    match /remote_wallpapers/{wallpaperId} {
+      allow get: if isValidId(wallpaperId) && (isAdmin() || (isSignedIn() && existing().isPublished == true));
+      allow list: if isAdmin() || (isSignedIn() && existing().isPublished == true);
+
+      allow create: if isAdmin() &&
+                       isValidId(wallpaperId) &&
+                       incoming().keys().hasAll([
+                         'wallpaperId', 'title', 'description', 'categoryId', 'categoryName',
+                         'mediaType', 'mediaUrl', 'thumbnailUrl', 'storagePath',
+                         'resolutionLabel', 'fileSizeBytes', 'isPremium', 'isPublished',
+                         'downloadCount', 'uploadedByUid', 'createdAt', 'updatedAt'
+                       ]) &&
+                       incoming().keys().hasOnly([
+                         'wallpaperId', 'title', 'description', 'categoryId', 'categoryName',
+                         'mediaType', 'mediaUrl', 'thumbnailUrl', 'storagePath', 'thumbnailStoragePath',
+                         'resolutionLabel', 'fileSizeBytes', 'isPremium', 'isPublished',
+                         'downloadCount', 'uploadedByUid', 'createdAt', 'updatedAt'
+                       ]) &&
+                       isValidRemoteWallpaper(incoming(), wallpaperId);
+
+      allow update: if isSignedIn() &&
+                       isValidId(wallpaperId) &&
+                       isValidRemoteWallpaper(incoming(), wallpaperId) &&
+                       incoming().wallpaperId == existing().wallpaperId &&
+                       incoming().createdAt == existing().createdAt &&
+                       incoming().uploadedByUid == existing().uploadedByUid &&
+                       (
+                         (
+                           isAdmin() &&
+                           incoming().diff(existing()).affectedKeys().hasOnly([
+                             'title', 'description', 'categoryId', 'categoryName',
+                             'mediaType', 'mediaUrl', 'thumbnailUrl', 'storagePath', 'thumbnailStoragePath',
+                             'resolutionLabel', 'fileSizeBytes', 'isPremium', 'isPublished',
+                             'downloadCount', 'updatedAt'
+                           ])
+                         ) ||
+                         (
+                           existing().isPublished == true &&
+                           incoming().downloadCount == existing().downloadCount + 1 &&
+                           incoming().diff(existing()).affectedKeys().hasOnly([
+                             'downloadCount', 'updatedAt'
+                           ])
+                         )
+                       );
+
+      allow delete: if isAdmin() && isValidId(wallpaperId);
+    }
+
+    match /app_config/{configId} {
+      allow get, list: if isSignedIn();
+
+      allow create: if isAdmin() &&
+                       configId == 'global' &&
+                       incoming().keys().hasAll([
+                         'configId', 'maintenanceMode', 'maintenanceMessage', 'announcementBanner',
+                         'aiSearchEnabled', 'liveWallpapersEnabled', 'edgePanelEnabled',
+                         'controlCenterEnabled', 'notificationBadgesEnabled', 'updatedByUid', 'updatedAt'
+                       ]) &&
+                       incoming().keys().hasOnly([
+                         'configId', 'maintenanceMode', 'maintenanceMessage', 'announcementBanner',
+                         'aiSearchEnabled', 'liveWallpapersEnabled', 'edgePanelEnabled',
+                         'controlCenterEnabled', 'notificationBadgesEnabled',
+                         'paymentGatewayEnabled', 'paymentProviderName', 'paymentBackendUrl',
+                         'paymentVerifyUrl', 'paymentPublicKey', 'paymentCurrency',
+                         'monthlyPriceLabel', 'yearlyPriceLabel', 'lifetimePriceLabel',
+                         'monthlyAmount', 'yearlyAmount', 'lifetimeAmount', 'usdToInrRate',
+                         'updatedByUid', 'updatedAt'
+                       ]) &&
+                       isValidRemoteConfig(incoming(), configId);
+
+      allow update: if isAdmin() &&
+                       configId == 'global' &&
+                       isValidRemoteConfig(incoming(), configId) &&
+                       incoming().configId == existing().configId &&
+                       incoming().diff(existing()).affectedKeys().hasOnly([
+                         'maintenanceMode', 'maintenanceMessage', 'announcementBanner',
+                         'aiSearchEnabled', 'liveWallpapersEnabled', 'edgePanelEnabled',
+                         'controlCenterEnabled', 'notificationBadgesEnabled',
+                         'paymentGatewayEnabled', 'paymentProviderName', 'paymentBackendUrl',
+                         'paymentVerifyUrl', 'paymentPublicKey', 'paymentCurrency',
+                         'monthlyPriceLabel', 'yearlyPriceLabel', 'lifetimePriceLabel',
+                         'monthlyAmount', 'yearlyAmount', 'lifetimeAmount', 'usdToInrRate',
+                         'updatedByUid', 'updatedAt'
+                       ]);
+
+      allow delete: if false;
+    }
+
+    match /admin_secrets/{secretId} {
+      allow get, list: if isAdmin();
+
+      allow create: if isAdmin() &&
+                       secretId == 'payment_gateway' &&
+                       incoming().keys().hasAll([
+                         'secretId', 'providerName', 'secretApiKey', 'webhookSecret', 'updatedByUid', 'updatedAt'
+                       ]) &&
+                       incoming().keys().hasOnly([
+                         'secretId', 'providerName', 'secretApiKey', 'webhookSecret', 'updatedByUid', 'updatedAt'
+                       ]) &&
+                       isValidPaymentSecrets(incoming(), secretId);
+
+      allow update: if isAdmin() &&
+                       secretId == 'payment_gateway' &&
+                       isValidPaymentSecrets(incoming(), secretId) &&
+                       incoming().secretId == existing().secretId &&
+                       incoming().diff(existing()).affectedKeys().hasOnly([
+                         'providerName', 'secretApiKey', 'webhookSecret', 'updatedByUid', 'updatedAt'
+                       ]);
+
+      allow delete: if isAdmin() && secretId == 'payment_gateway';
+    }
+
+    match /subscription_plans/{planId} {
+      allow get: if isValidId(planId) && (isAdmin() || (isSignedIn() && existing().isActive == true));
+      allow list: if isAdmin() || (isSignedIn() && existing().isActive == true);
+
+      allow create: if isAdmin() &&
+                       isValidId(planId) &&
+                       incoming().keys().hasAll([
+                         'planId', 'planName', 'subtitle', 'priceInr', 'validityDays',
+                         'badge', 'sortOrder', 'isActive', 'updatedByUid', 'createdAt', 'updatedAt'
+                       ]) &&
+                       incoming().keys().hasOnly([
+                         'planId', 'planName', 'subtitle', 'priceInr', 'validityDays',
+                         'badge', 'sortOrder', 'isActive', 'updatedByUid', 'createdAt', 'updatedAt'
+                       ]) &&
+                       isValidSubscriptionPlan(incoming(), planId);
+
+      allow update: if isAdmin() &&
+                       isValidId(planId) &&
+                       isValidSubscriptionPlan(incoming(), planId) &&
+                       incoming().planId == existing().planId &&
+                       incoming().createdAt == existing().createdAt &&
+                       incoming().diff(existing()).affectedKeys().hasOnly([
+                         'planName', 'subtitle', 'priceInr', 'validityDays',
+                         'badge', 'sortOrder', 'isActive', 'updatedByUid', 'updatedAt'
+                       ]);
+
+      allow delete: if isAdmin() && isValidId(planId);
+    }
+
+    match /payment_orders/{orderId} {
+      allow get: if isValidId(orderId) && (isAdmin() || (isSignedIn() && existing().userId == request.auth.uid));
+      allow list: if isAdmin() || (isSignedIn() && existing().userId == request.auth.uid);
+      allow write: if isAdmin();
+    }
+  }
+}

@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="Theme.AndroidLauncher" parent="android:Theme.Material.NoActionBar">
+        <item name="android:windowBackground">#090B10</item>
+    </style>
+
+    <style name="Theme.AndroidLauncher.Splash" parent="Theme.SplashScreen">
+        <item name="windowSplashScreenBackground">#0C0F16</item>
+        <item name="windowSplashScreenAnimatedIcon">@drawable/ic_splash_icon</item>
+        <item name="postSplashScreenTheme">@style/Theme.AndroidLauncher</item>
+    </style>
+
+    <style name="Theme.AndroidLauncher.Wallpaper" parent="android:Theme.Wallpaper.NoTitleBar">
+        <item name="android:windowShowWallpaper">true</item>
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:colorBackgroundCacheHint">@null</item>
+    </style>
+</resources>

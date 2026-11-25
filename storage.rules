@@ -1,0 +1,32 @@
+rules_version = '2';
+
+service firebase.storage {
+  match /b/{bucket}/o {
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isAdminEmail() {
+      return isSignedIn() &&
+        request.auth.token.email_verified == true &&
+        request.auth.token.email == 'sujitmehta696@gmail.com';
+    }
+
+    // Published wallpapers, thumbnails & live MP4 videos uploaded by Admins
+    match /wallpapers/{wallpaperId}/{fileName} {
+      allow read: if isSignedIn();
+      allow write: if isAdminEmail() &&
+        request.resource != null &&
+        request.resource.size <= 75 * 1024 * 1024 &&
+        (
+          request.resource.contentType.matches('image/.*') ||
+          request.resource.contentType.matches('video/.*')
+        );
+      allow delete: if isAdminEmail();
+    }
+  }
+}

@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "catalogName": "Android Launcher Studio Content Manifest",
+  "freeWallpapersBundled": 50,
+  "freeThemesBundled": 50,
+  "premiumWallpapersBundledStarter": 60,
+  "premiumThemesBundledStarter": 60,
+  "premiumWallpapersTargetCapacity": 2000,
+  "premiumThemesTargetCapacity": 2000,
+  "paginationPageSize": 20,
+  "licenseNotice": "All bundled raster artworks and procedural studio compositions are original assets created for Android Launcher. Expansion packs up to 2,000 premium wallpapers and 2,000 premium themes are indexed via paginated manifest packs without duplication.",
+  "collections": [
+    { "id": "amoled", "title": "AMOLED Obsidian", "tier": "MIXED", "targetCount": 300 },
+    { "id": "cinematic", "title": "Cinematic Horizons", "tier": "PREMIUM", "targetCount": 300 },
+    { "id": "abstract", "title": "Sculpted Abstract", "tier": "MIXED", "targetCount": 250 },
+    { "id": "nature", "title": "Atmospheric Nature", "tier": "MIXED", "targetCount": 250 },
+    { "id": "space", "title": "Deep Orbital Space", "tier": "MIXED", "targetCount": 250 },
+    { "id": "luxury", "title": "Luxury Atelier", "tier": "PREMIUM", "targetCount": 250 },
+    { "id": "minimal", "title": "Architectural Minimal", "tier": "MIXED", "targetCount": 200 },
+    { "id": "exclusive", "title": "Studio Exclusives", "tier": "PREMIUM", "targetCount": 200 }
+  ]
+}
